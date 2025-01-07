@@ -30,34 +30,49 @@
   });
 
   let isSolved = $derived(solveState === "valid" || data.completion);
+
+  let showConfirmDelete = $state(false);
 </script>
 
 <main>
-  <form method="post" action="?/solve" use:enhance class:solved={isSolved}>
-    <PuzzleDisplay {puzzle} />
-    {#if !isLoggedIn}
-      <div>
-        <a href="/auth/login">Login</a> or <a href="/auth/register">register</a>
-        to solve this puzzle.
-      </div>
-    {:else if isOwned}
-      <div>This is your very nice puzzle. Bask in its beauty.</div>
-    {:else}
-      {#if !isSolved}
+  {#if isOwned}
+    <form method="post" action="?/delete" use:enhance>
+      <PuzzleDisplay {puzzle} />
+      {#if showConfirmDelete}
+        <span> Are you sure you want to delete it?</span>
+        <button onclick={() => (showConfirmDelete = false)}>Cancel</button>
+        <button type="submit">Yes, definitely delete it.</button>
+      {:else}
+        <div>This is your very nice puzzle. Bask in its beauty.</div>
+        <button onclick={() => (showConfirmDelete = true)}>Delete</button>
+      {/if}
+    </form>
+  {:else}
+    <form method="post" action="?/solve" use:enhance class:solved={isSolved}>
+      <PuzzleDisplay {puzzle} />
+      {#if !isLoggedIn}
         <div>
-          <input type="text" name="answer" readonly={isSolved} />
-          <button type="submit">Submit</button>
+          <a href="/auth/login">Login</a> or
+          <a href="/auth/register">register</a>
+          to solve this puzzle.
         </div>
       {:else}
-        <span>{puzzle.solution}</span>
+        {#if !isSolved}
+          <div>
+            <input type="text" name="answer" readonly={isSolved} />
+            <button type="submit">Submit</button>
+          </div>
+        {:else}
+          <span>{puzzle.solution}</span>
+        {/if}
+        {#if solveState === "valid"}
+          <div>Correct! 🎉</div>
+        {:else if solveState === "invalid"}
+          <div>Try again 😭</div>
+        {/if}
       {/if}
-      {#if solveState === "valid"}
-        <div>Correct! 🎉</div>
-      {:else if solveState === "invalid"}
-        <div>Try again 😭</div>
-      {/if}
-    {/if}
-  </form>
+    </form>
+  {/if}
 </main>
 
 <style>

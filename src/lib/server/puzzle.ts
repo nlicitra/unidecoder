@@ -80,11 +80,21 @@ export async function getPuzzles(params: DBQueryParams = {}): Promise<Puzzle[]> 
   return results.map(({ puzzle, user }) => deserialize(puzzle, user));
 }
 
+function splitGlyphs(str: string) {
+  const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+  return [...segmenter.segment(str)].map(segment => segment.segment);
+}
+
 export async function createPuzzle(glyphs: string, solution: string, userId: string): Promise<string> {
   const id = short.generate();
-  const csvGlyphs = [...glyphs].join(",");
+  const csvGlyphs = splitGlyphs(glyphs).join(",");
   await db.insert(table.puzzle).values({ id, glyphs: csvGlyphs, solution, createdBy: userId });
   return id;
+}
+
+export async function deletePuzzle(puzzleId: string) {
+  await db.delete(table.puzzleCompletion).where(eq(table.puzzleCompletion.puzzleId, puzzleId));
+  return db.delete(table.puzzle).where(eq(table.puzzle.id, puzzleId));
 }
 
 export async function registerPuzzleCompletion(puzzleId: string, userId: string) {

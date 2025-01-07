@@ -16,7 +16,6 @@ export const actions: Actions = {
     const puzzle = formData.get('puzzle');
     const solution = formData.get('solution');
 
-    console.log(event.locals.user, puzzle, solution);
     const userId = event.locals.user?.id;
 
     if (!userId) {

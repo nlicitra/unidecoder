@@ -1,6 +1,6 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { getPuzzleById, getPuzzleCompletion, registerPuzzleCompletion } from '$lib/server/puzzle';
+import { deletePuzzle, getPuzzleById, getPuzzleCompletion, registerPuzzleCompletion } from '$lib/server/puzzle';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
   const puzzle = await getPuzzleById(params.id);
@@ -37,5 +37,10 @@ export const actions: Actions = {
       await registerPuzzleCompletion(id, userId);
     }
     return { success }
+  },
+  delete: async (event) => {
+    const puzzleId = event.params.id;
+    await deletePuzzle(puzzleId);
+    redirect(302, "/");
   }
 }
